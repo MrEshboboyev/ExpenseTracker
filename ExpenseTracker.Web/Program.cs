@@ -1,4 +1,8 @@
+using ExpenseTracker.Application.Common.Interfaces;
+using ExpenseTracker.Application.Services.Implementation;
+using ExpenseTracker.Application.Services.Interfaces;
 using ExpenseTracker.Infrastructure.Data;
+using ExpenseTracker.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +19,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+// adding service lifetimes
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 var app = builder.Build();
 
