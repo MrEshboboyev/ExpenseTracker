@@ -57,15 +57,16 @@ namespace ExpenseTracker.Application.Services.Implementation
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
+
+            var claimList = new List<Claim> 
+            {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(ClaimTypes.Name, user.UserName),
+            };
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                { 
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user.FullName),
-                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                }),
+                Subject = new ClaimsIdentity(claimList),
                 Expires = DateTime.UtcNow.AddDays(7),
                 Issuer = issuer,
                 Audience = audience,

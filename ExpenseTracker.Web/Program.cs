@@ -18,28 +18,38 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(option =>
 {
-    var securitySchema = new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    };
-
-    c.AddSecurityDefinition("Bearer", securitySchema);
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
-        {
-            securitySchema,
-            new[] { "Bearer" }
-        }
-    });
+    option.AddSecurityDefinition
+    (
+        name: JwtBearerDefaults.AuthenticationScheme, 
+        securityScheme: new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Description = "Enter the Bearer Authorization string as following : `Bearer Generated-JWT-Token`",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            }
+    );
+    option.AddSecurityRequirement
+    (
+        new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = JwtBearerDefaults.AuthenticationScheme
+                        }
+                    }, new string[]{ }
+                }
+            }
+    );
 });
+
 
 // adding database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -62,8 +72,6 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = true;
-    options.SaveToken = true;
     options.TokenValidationParameters = new()
     {
         ValidateIssuerSigningKey = true,
@@ -72,8 +80,6 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidIssuer = issuer,
         ValidAudience = audience,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
     };
 });
 
