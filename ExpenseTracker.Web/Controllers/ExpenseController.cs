@@ -2,6 +2,7 @@
 using ExpenseTracker.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExpenseTracker.Web.Controllers
 {
@@ -21,14 +22,16 @@ namespace ExpenseTracker.Web.Controllers
         [HttpGet]
         public IActionResult GetAllExpenses()
         {
-            var expenses = _expenseService.GetAllExpenses();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var expenses = _expenseService.GetAllExpenses(userId);
             return Ok(expenses);
         }
 
         [HttpGet("{id:int}")]
         public IActionResult GetExpenseById(int id)
         {
-            var expense = _expenseService.GetExpenseById(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var expense = _expenseService.GetExpenseById(id, userId);
             if (expense == null)
             {
                 return NotFound();
@@ -69,7 +72,8 @@ namespace ExpenseTracker.Web.Controllers
         [HttpDelete("{id:int}")]
         public IActionResult DeleteExpense(int id)
         {
-            _expenseService.DeleteExpense(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _expenseService.DeleteExpense(id, userId);
             return NoContent(); 
         }
     }

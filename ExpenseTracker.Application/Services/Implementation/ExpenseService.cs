@@ -21,12 +21,12 @@ namespace ExpenseTracker.Application.Services.Implementation
             _unitOfWork.Save();
         }
 
-        public bool DeleteExpense(int id)
+        public bool DeleteExpense(int id, string userId)
         {
             try
             {
                 // get expense by id
-                var expense = _unitOfWork.Expense.Get(c => c.Id == id);
+                var expense = _unitOfWork.Expense.Get(c => c.Id == id && c.UserId == userId);
                 if (expense != null)
                 {
                     _unitOfWork.Expense.Remove(expense);
@@ -46,14 +46,27 @@ namespace ExpenseTracker.Application.Services.Implementation
             return false;
         }
 
-        public IEnumerable<Expense> GetAllExpenses()
+        public IEnumerable<Expense> GetAllExpenses(string userId)
         {
-            return _unitOfWork.Expense.GetAll();
+            return _unitOfWork.Expense.GetAll(e => e.UserId == userId);
         }
 
-        public Expense GetExpenseById(int id)
+        public Expense GetExpenseById(int id, string userId)
         {
-            return _unitOfWork.Expense.Get(c => c.Id == id);
+            return _unitOfWork.Expense.Get(e => e.Id == id && e.UserId == userId);
+        }
+
+        public IEnumerable<Expense> GetFilteredExpenses(string userId, DateTime? startDate, DateTime? endDate)
+        {
+            var query = _unitOfWork.Expense.GetAll(e => e.UserId == userId);
+
+            if (startDate.HasValue)
+                query = query.Where(e => e.Date >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(e => e.Date <= endDate.Value);
+
+            return query.ToList();
         }
 
         public void UpdateExpense (Expense expense)
