@@ -1,9 +1,11 @@
 ﻿using ExpenseTracker.Application.Services.Interfaces;
 using ExpenseTracker.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.Web.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -34,6 +36,7 @@ namespace ExpenseTracker.Web.Controllers
             return Ok(category);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult CreateCategory([FromBody] Category category)
         {
@@ -46,6 +49,7 @@ namespace ExpenseTracker.Web.Controllers
             return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public IActionResult UpdateCategory(int id, [FromBody] Category category)
         {
@@ -63,12 +67,13 @@ namespace ExpenseTracker.Web.Controllers
 
             return NoContent(); 
         }
-        
+
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public IActionResult DeleteCategory(int id)
         {
             _categoryService.DeleteCategory(id);
             return NoContent(); 
-        }
+        } 
     }
 }
