@@ -20,10 +20,18 @@ namespace ExpenseTracker.Web.Controllers
             _expenseService = expenseService;
         }
 
+        #region Private methods
+        private string GetUserId()
+        {
+            return User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+        #endregion
+
+        #region CRUD 
         [HttpGet]
         public IActionResult GetAllExpenses()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
             var expenses = _expenseService.GetAllExpenses(userId);
             return Ok(expenses);
         }
@@ -31,7 +39,7 @@ namespace ExpenseTracker.Web.Controllers
         [HttpGet("{id:int}")]
         public IActionResult GetExpenseById(int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
             var expense = _expenseService.GetExpenseById(id, userId);
             if (expense == null)
             {
@@ -48,7 +56,7 @@ namespace ExpenseTracker.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
 
             var expense = new Expense()
             {
@@ -76,7 +84,7 @@ namespace ExpenseTracker.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
 
             var expense = new Expense()
             {
@@ -96,7 +104,7 @@ namespace ExpenseTracker.Web.Controllers
         [HttpDelete("{id:int}")]
         public IActionResult DeleteExpense(int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
             var expense = _expenseService.GetExpenseById(id, userId);
             if (expense == null)
             {
@@ -105,5 +113,40 @@ namespace ExpenseTracker.Web.Controllers
             _expenseService.DeleteExpense(id, userId);
             return NoContent(); 
         }
+        #endregion
+
+        #region Filters
+        [HttpGet("past-week")]
+        public IActionResult GetExpensesForPastWeek()
+        {
+            var userId = GetUserId();
+            var expenses = _expenseService.GetExpensesForPastWeek(userId);
+            return Ok(expenses);
+        }
+
+        [HttpGet("last-month")]
+        public IActionResult GetExpensesForLastMonth()
+        {
+            var userId = GetUserId();
+            var expenses = _expenseService.GetExpensesForLastMonth(userId);
+            return Ok(expenses);
+        }
+
+        [HttpGet("last-3-months")]
+        public IActionResult GetExpensesForLast3Months()
+        {
+            var userId = GetUserId();
+            var expenses = _expenseService.GetExpensesForLast3Months(userId);
+            return Ok(expenses);
+        }
+
+        [HttpGet("date-range")]
+        public IActionResult GetExpensesForDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            var userId = GetUserId();
+            var expenses = _expenseService.GetExpensesForDateRange(userId, startDate, endDate);
+            return Ok(expenses);
+        }
+        #endregion
     }
 }
