@@ -29,6 +29,7 @@ namespace ExpenseTracker.Web.Controllers
         {
             var result = await _authService.RegisterAsync(model);
             if (result == null) return BadRequest("User registration failed.");
+            if (!string.IsNullOrEmpty(result)) return BadRequest(result);
             return Ok(result);
         }
     }

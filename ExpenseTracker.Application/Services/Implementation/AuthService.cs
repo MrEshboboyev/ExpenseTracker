@@ -14,13 +14,18 @@ namespace ExpenseTracker.Application.Services.Implementation
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        public AuthService(UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            IConfiguration configuration, 
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _roleManager = roleManager;
         }
 
         public async Task<string> RegisterAsync(RegisterModel model)
@@ -32,11 +37,22 @@ namespace ExpenseTracker.Application.Services.Implementation
                 UserName = model.Email, 
                 NormalizedEmail = model.Email.ToUpper(), 
             };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
+            
+            // Assign the role to user
+            if (await _roleManager.RoleExistsAsync(model.RoleName))
             {
-                return GenerateJwtToken(user);
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, model.RoleName);
+                    return GenerateJwtToken(user);
+                }
             }
+            else // role is not found
+            {
+                return "Role does not exist!";
+            }
+            
             return null; // Handle error accordingly
         }
 
