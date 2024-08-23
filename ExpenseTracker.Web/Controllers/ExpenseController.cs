@@ -1,9 +1,11 @@
 ﻿using ExpenseTracker.Application.Services.Interfaces;
 using ExpenseTracker.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.Web.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ExpenseController : ControllerBase
