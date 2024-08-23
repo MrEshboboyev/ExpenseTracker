@@ -25,7 +25,13 @@ namespace ExpenseTracker.Application.Services.Implementation
 
         public async Task<string> RegisterAsync(RegisterModel model)
         {
-            var user = new ApplicationUser { UserName = model.UserName, Email = model.Email };
+            var user = new ApplicationUser 
+            { 
+                FullName = model.FullName, 
+                Email = model.Email, 
+                UserName = model.Email, 
+                NormalizedEmail = model.Email.ToUpper(), 
+            };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
