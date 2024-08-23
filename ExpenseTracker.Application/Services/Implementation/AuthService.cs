@@ -45,7 +45,8 @@ namespace ExpenseTracker.Application.Services.Implementation
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, model.RoleName);
-                    return GenerateJwtToken(user);
+
+                    return "Register successfully!";
                 }
             }
             else // role is not found
@@ -62,12 +63,13 @@ namespace ExpenseTracker.Application.Services.Implementation
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByNameAsync(model.UserName);
-                return GenerateJwtToken(user);
+                var userRoles = await _userManager.GetRolesAsync(user);
+                return GenerateJwtToken(user, userRoles);
             }
             return null; // Handle error accordingly
         }
 
-        public string GenerateJwtToken(ApplicationUser user)
+        public string GenerateJwtToken(ApplicationUser user, IEnumerable<string> roles)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
@@ -78,8 +80,12 @@ namespace ExpenseTracker.Application.Services.Implementation
             {
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Name, user.UserName)
             };
+
+            // adding roles to claim list
+            claimList.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claimList),

@@ -7,6 +7,6 @@ namespace ExpenseTracker.Application.Services.Interfaces
     {
         Task<string> RegisterAsync(RegisterModel model);
         Task<string> LoginAsync(LoginModel model);
-        string GenerateJwtToken(ApplicationUser user);
+        string GenerateJwtToken(ApplicationUser user, IEnumerable<string> roles);
     }
 }
