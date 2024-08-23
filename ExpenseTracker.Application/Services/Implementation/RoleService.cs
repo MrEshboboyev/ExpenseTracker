@@ -18,13 +18,13 @@ namespace ExpenseTracker.Application.Services.Implementation
             return await _roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-        public async Task<IdentityResult> DeleteRoleAsync(string roleId)
+        public async Task<IdentityResult> DeleteRoleAsync(string roleName)
         {
-            var role = await _roleManager.FindByIdAsync(roleId);
-            if (role is not null) await _roleManager.DeleteAsync(role);
+            var role = await _roleManager.FindByNameAsync(roleName);
+            if (role is not null) return await _roleManager.DeleteAsync(role);
             return IdentityResult.Failed(new IdentityError
             {
-                Description = $"Role with ID '{roleId}' not found."
+                Description = $"Role with Name '{roleName}' not found."
             });
         }
 
@@ -33,9 +33,9 @@ namespace ExpenseTracker.Application.Services.Implementation
             return _roleManager.Roles;
         }
 
-        public async Task<IdentityRole> GetRoleByIdAsync(string roleId)
+        public async Task<IdentityRole> GetRoleByNameAsync(string roleName)
         {
-            return await _roleManager.FindByIdAsync(roleId);
+            return await _roleManager.FindByNameAsync(roleName);
         }
 
         public async Task<IdentityResult> UpdateRoleAsync(string roleId, string newRoleName)
@@ -44,7 +44,7 @@ namespace ExpenseTracker.Application.Services.Implementation
             if (role is not null)
             {
                 role.Name = newRoleName;
-                await _roleManager.DeleteAsync(role);
+                return await _roleManager.UpdateAsync(role);
             }
             return IdentityResult.Failed(new IdentityError
             {
